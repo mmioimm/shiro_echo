@@ -12,4 +12,4 @@ shiro 反序列化 回显检测
 
 # lucky_shiro
 
--已重构，大家若是使用请使用lucky_shiro.py
+- 已重构，大家若是使用请使用lucky_shiro.py
